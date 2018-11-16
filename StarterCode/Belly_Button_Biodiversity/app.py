@@ -29,7 +29,7 @@ Base = automap_base()
 Base.prepare(db.engine, reflect=True)
 
 # Store references to the tables so we can query them.
-Samples_Metadata = Base.classes.session_metadata
+Samples_Metadata = Base.classes.sample_metadata
 Samples = Base.classes.samples
 
 
@@ -43,12 +43,19 @@ def index():
 def names():
     """Return a list of sample names."""
 
-    # Use Pandas to perform the sql query
-    stmt = db.session.query(Samples).statement
-    df = pd.read_sql_query(stmt, db.session.bind)
+    # Plugs "Samples", the reference to the 'samples' table from the database.
+    # stmt returns a SQL query via .statement.
+    # If you load the entire table reference into the query with .statement, it will return the entire table
+    # It's the equivalent of interpreting "SELECT * FROM samples"
+    stmt= db.session.query(Samples).statement
 
-    # Return a list of the column names (sample names)
-    return jsonify(list(df.columns)[2:])
+    # Use pandas to read the query and returns a dataframe from the query.
+    # stmt is the query while 'db.engine' is the mapped datbase.
+    df = pd.read_sql_query(stmt, db.engine)
+
+    # Return the list of the columns where samples names are included. 
+    # The first two columns are "id" and "label", respectively.
+    return jsonify(list(df.columns[2:]))
 
 
 @app.route("/metadata/<sample>")
