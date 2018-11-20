@@ -11,24 +11,22 @@ from sqlalchemy import create_engine
 from flask import Flask, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 
-
-# Initialize the app. Should be first step.
 app = Flask(__name__)
+
 
 #################################################
 # Database Setup
 #################################################
 
-# Configure the app to connect to your sqlite database.
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db/bellybutton.sqlite"
 db = SQLAlchemy(app)
 
-# Reflect database to existing model
+# reflect an existing database into a new model
 Base = automap_base()
-# Reflect tables from the database
+# reflect the tables
 Base.prepare(db.engine, reflect=True)
 
-# Store references to the tables so we can query them.
+# Save references to each table
 Samples_Metadata = Base.classes.sample_metadata
 Samples = Base.classes.samples
 
@@ -43,19 +41,12 @@ def index():
 def names():
     """Return a list of sample names."""
 
-    # Plugs "Samples", the reference to the 'samples' table from the database.
-    # stmt returns a SQL query via .statement.
-    # If you load the entire table reference into the query with .statement, it will return the entire table
-    # It's the equivalent of interpreting "SELECT * FROM samples"
-    stmt= db.session.query(Samples).statement
+    # Use Pandas to perform the sql query
+    stmt = db.session.query(Samples).statement
+    df = pd.read_sql_query(stmt, db.session.bind)
 
-    # Use pandas to read the query and returns a dataframe from the query.
-    # stmt is the query while 'db.engine' is the mapped datbase.
-    df = pd.read_sql_query(stmt, db.engine)
-
-    # Return the list of the columns where samples names are included. 
-    # The first two columns are "id" and "label", respectively.
-    return jsonify(list(df.columns[2:]))
+    # Return a list of the column names (sample names)
+    return jsonify(list(df.columns)[2:])
 
 
 @app.route("/metadata/<sample>")
