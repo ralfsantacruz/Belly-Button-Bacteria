@@ -11,25 +11,23 @@ from sqlalchemy import create_engine
 from flask import Flask, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 
-
-# Initialize the app. Should be first step.
 app = Flask(__name__)
+
 
 #################################################
 # Database Setup
 #################################################
 
-# Configure the app to connect to your sqlite database.
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db/bellybutton.sqlite"
 db = SQLAlchemy(app)
 
-# Reflect database to existing model
+# reflect an existing database into a new model
 Base = automap_base()
-# Reflect tables from the database
+# reflect the tables
 Base.prepare(db.engine, reflect=True)
 
-# Store references to the tables so we can query them.
-Samples_Metadata = Base.classes.session_metadata
+# Save references to each table
+Samples_Metadata = Base.classes.sample_metadata
 Samples = Base.classes.samples
 
 
