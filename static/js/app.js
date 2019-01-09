@@ -15,6 +15,7 @@ function buildMetadata(sample) {
       Object.entries(sample).forEach(function([key,value]){
         var row = sampleData.append("p");
         row.text(`${key}:${value}`)
+        console.log(`${key}:${value}`)
       })
     });
 }
@@ -69,7 +70,6 @@ function buildCharts(sample) {
     // otu_ids, and labels (10 each).
 
 function init() {
-  console.log('hello');
   // Grab a reference to the dropdown select element
   var selector = d3.select("#selDataset");
 
@@ -78,8 +78,9 @@ function init() {
     sampleNames.forEach((sample) => {
       selector
         .append("option")
-        .text(sample)
+        .text(`${sample}`)
         .property("value", sample);
+    console.log(sample)
     });
 
     // Use the first sample from the list to build the initial plots
